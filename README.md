@@ -1,1 +1,5 @@
 # HackYeah
+
+Members:
+
+Szymon Sadowski
