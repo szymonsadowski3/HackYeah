@@ -1,12 +1,10 @@
 from Classes.PythonMySql import MySqlWrapper
 from Classes.Stemmer import Stemmer
-from Classes.TweetClassifier import TweetClassifier
 from Classes.TwitterUnlimitedFetcher import TwitterUnlimitedFetcher
 
 
 class TweetToCategoryMatcher(object):
     def __init__(self):
-        self.tweet_classifier = TweetClassifier()
         self.tweets_fetcher = TwitterUnlimitedFetcher()
         self.mysql_wrapper = MySqlWrapper()
         self.stemmer = Stemmer()
