@@ -15,21 +15,18 @@ class TwitterUnlimitedFetcher(object):
     def get_all_tweets(self, screen_name):
         alltweets = []
 
-        new_tweets = self.api.user_timeline(screen_name=screen_name, count=200)
+        new_tweets = self.api.user_timeline(screen_name=screen_name, count=20)
         alltweets.extend(new_tweets)
-        oldest = alltweets[-1].id - 1
+        return [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
 
-        while len(new_tweets) > 0:
-            print("getting tweets before %s" % oldest)
-            new_tweets = self.api.user_timeline(screen_name=screen_name, count=200, max_id=oldest)
-            alltweets.extend(new_tweets)
-            oldest = alltweets[-1].id - 1
-            print("...%s tweets downloaded so far" % (len(alltweets)))
-
-        outtweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
-
-        return outtweets
+    def does_user_exist(self, username):
+        try:
+            user = self.api.get_user(username)
+            return user is not None
+        except tweepy.error.TweepError:
+            return False
 
 
 if __name__ == '__main__':
-    TwitterUnlimitedFetcher().get_all_tweets("BoniekZibi")
+    print(TwitterUnlimitedFetcher().does_user_exist("BoniekZibiasfasf"))
+

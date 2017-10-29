@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Flask React</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/custom.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/eModal.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <h1 class="mt-5">Find matching articles!</h1>
+            <p class="lead">Type in your twitter username below:</p>
+            <div id="content"></div>
+        </div>
+    </div>
+</div>
+<script type="text/jsx">
+
+    /*** @jsx React.DOM */
+
+    function Articles(props) {
+        return (
+                <div>
+                    <ul className="list-group top-spacer">
+                        <li className="list-group-item active">{props.categories}</li>
+                        <li className="list-group-item">Article 1</li>
+                        <li className="list-group-item">Article 2</li>
+                        <li className="list-group-item">Article 3</li>
+                        <li className="list-group-item">Article 4</li>
+                    </ul>
+                </div>
+        );
+    }
+
+    class QueryForm extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {inputValue: '', showArticles: false, btnDisabled: false};
+            this.fetchSearchResults = this.fetchSearchResults.bind(this);
+            this.updateInputValue = function (evt) {
+                this.setState({
+                    inputValue: evt.target.value
+                });
+            }
+        }
+
+        fetchSearchResults() {
+            var component = this;
+
+            if (this.state.inputValue.trim()) {
+                axios.get("/user/" + this.state.inputValue + "/exists").then(function (data) {
+                    if (data['data']['exists']) {
+                        component.state.btnDisabled = true;
+                        component.setState({
+                            btnDisabled: true,
+                            inputValue: component.state.inputValue,
+                            showArticles: component.state.showArticles
+                        });
+
+                        axios.get("/user/" + component.state.inputValue + "/categories").then(
+                            function (data) {
+                                let categories = data['data']['categories'];
+                                let showArticles = true;
+
+                                component.setState({
+                                    categories: categories,
+                                    showArticles: showArticles,
+                                    btnDisabled: false
+                                });
+                            }
+                        ).catch(function (error) {
+                            eModal.alert("Error!");
+                        });
+
+                        eModal.alert("Request accepred, fetching data...");
+                    } else {
+                        eModal.alert("Specified user does not exist!");
+                    }
+                });
+            }
+        }
+
+        render() {
+            return (
+                    <div>
+                        <div className="form-group">
+                            <label className="sr-only" for="email">Twitter username</label>
+                            <input type="text" className="form-control" id="email" value={this.state.inputValue}
+                                   onChange={evt => this.updateInputValue(evt)}/>
+                            <button type="submit" className="btn btn-default" onClick={this.fetchSearchResults}
+                                    disabled={this.state.btnDisabled}>Submit
+                            </button>
+                        </div>
+                        {this.state.showArticles && <Articles categories={this.state.categories}/>}
+                    </div>
+            );
+        }
+    }
+
+    function App() {
+        return (
+                <div className="form-inline">
+                    <QueryForm/>
+                </div>
+        );
+    }
+
+    ReactDOM.render(
+            <App/>,
+        document.getElementById('content')
+    );
+
+</script>
+</body>
+</html>
