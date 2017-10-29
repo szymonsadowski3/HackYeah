@@ -19,7 +19,8 @@ class TweetToCategoryMatcher(object):
             print(index)
             categories_links.extend(self.get_category_for_tweet(tweet[2].decode('utf8')))
 
-        links = [link[2] for link in categories_links]
+        links_sorted = sorted(categories_links, key=lambda x: x[1], reverse=True)
+        links = [link[2] for link in links_sorted]
 
         return list(set(links))
 
@@ -42,4 +43,5 @@ class TweetToCategoryMatcher(object):
 
         return self.mysql_wrapper.fetch_rows_from_query(query)
 
-print(TweetToCategoryMatcher().get_links_for_user("BoniekZibi"))
+
+# TweetToCategoryMatcher().get_links_for_user("BoniekZibi")
